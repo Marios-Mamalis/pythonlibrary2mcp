@@ -11,4 +11,4 @@ dependencies = [
     "typer>=0.16.0",
 ]
 [tool.pytest.ini_options]
-pythonpath = ["src"]
+pythonpath = ["src/pylib2mcp"]
