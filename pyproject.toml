@@ -1,5 +1,5 @@
 [project]
-name = "pythonlibrary2mcp"
+name = "pylib2mcp"
 version = "1.0.0"
 description = "Port Python library functions as MCP tools"
 requires-python = "==3.12.*"
