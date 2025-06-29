@@ -1,5 +1,5 @@
 import pytest
-from core import import_function_from_module
+from core import import_function_from_module, discover_all_functions_of_module
 
 
 class TestImportFunctionFromModule:
@@ -29,3 +29,34 @@ class TestImportFunctionFromModule:
     def test_raise_library_not_found(self):
         with pytest.raises(ModuleNotFoundError):
             import_function_from_module(module_name="math1", func_name="sqrt")
+
+
+class TestDiscoverAllFunctionsOfModule:
+
+    def test_get_function_names_for_built_in_library(self):
+        assert discover_all_functions_of_module(module_name="token") == [
+            "ISEOF",
+            "ISNONTERMINAL",
+            "ISTERMINAL",
+        ], "Discovery of built-in library functions was not complete."
+
+    def test_get_function_names_for_external_library(self):
+        assert discover_all_functions_of_module(module_name="pytest") == [
+            "approx",
+            "console_main",
+            "deprecated_call",
+            "exit",
+            "fail",
+            "fixture",
+            "freeze_includes",
+            "importorskip",
+            "main",
+            "param",
+            "raises",
+            "register_assert_rewrite",
+            "set_trace",
+            "skip",
+            "warns",
+            "xfail",
+            "yield_fixture",
+        ], "Discovery of external library functions was not complete."

@@ -1,6 +1,7 @@
 import importlib
-from typing import Callable
+from typing import Callable, List
 import logging
+import inspect
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -22,3 +23,21 @@ def import_function_from_module(module_name: str, func_name: str) -> Callable:
     func = getattr(module, func_name)
 
     return func
+
+
+def discover_all_functions_of_module(module_name: str) -> List[str]:
+    """
+    For a given module name, returns the names of all of its functions. The module must already be installed.
+
+    :param module_name: The import name of the module to inspect.
+    :return: A list of function names (as strings) defined in the module.
+    """
+
+    module = importlib.import_module(module_name)
+
+    function_names = []
+    for name, obj in inspect.getmembers(module):
+        if inspect.isroutine(obj):
+            function_names.append(name)
+
+    return function_names
