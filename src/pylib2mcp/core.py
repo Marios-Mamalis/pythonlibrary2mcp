@@ -1,13 +1,12 @@
 import importlib
-from typing import Callable, List
-import logging
 import inspect
+from pydantic.errors import PydanticSchemaGenerationError
+from types import BuiltinFunctionType
+from typing import Callable, List
+import warnings
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-handler = logging.StreamHandler()
-handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
-logger.addHandler(handler)
+from fastmcp import FastMCP
+from fastmcp.tools import FunctionTool
 
 
 def import_function_from_module(module_name: str, func_name: str) -> Callable:
@@ -41,3 +40,52 @@ def discover_all_functions_of_module(module_name: str) -> List[str]:
             function_names.append(name)
 
     return function_names
+
+
+def wrap_built_in_func_as_user_defined_func(bfunc: Callable) -> Callable:
+    """
+    Wraps a built-in function in a user defined function, to enable attachment to a FastMCP server.
+    :param bfunc: The built-in function.
+    :return: The user-defined function containing the built-in.
+    """
+
+    params = ", ".join(list(inspect.signature(bfunc).parameters))
+    code = f"""
+def wfunc({params}):
+    return ({params})
+"""
+
+    namespace = {}
+    exec(code, namespace)
+
+    namespace["wfunc"].__name__ = bfunc.__name__
+    namespace["wfunc"].__doc__ = bfunc.__doc__
+
+    return namespace["wfunc"]
+
+
+def add_function_as_mcp_tool(func: Callable, mcp_server: FastMCP) -> None:
+    """
+    Adds a function to an MCP Server.
+    :param func: The function to be added.
+    :param mcp_server: The FastMCP server to attach the function to.
+    :return: None
+    """
+    if func.__name__ == "<lambda>":
+        return
+
+    if isinstance(func, BuiltinFunctionType):
+        func = wrap_built_in_func_as_user_defined_func(bfunc=func)
+
+    try:
+        t = FunctionTool.from_function(fn=func)
+        mcp_server.add_tool(t)
+    except PydanticSchemaGenerationError:
+        warnings.warn(
+            f'Failed to add function "{func.__name__}", function paramter type not supported.',
+            UserWarning,
+        )
+    except Exception as e:
+        warnings.warn(
+            f'Failed to add function "{func.__name__}" as MCP tool: {e}', UserWarning
+        )

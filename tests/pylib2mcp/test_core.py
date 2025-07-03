@@ -1,5 +1,7 @@
 import pytest
-from core import import_function_from_module, discover_all_functions_of_module
+from fastmcp import FastMCP
+import inspect
+from core import *
 
 
 class TestImportFunctionFromModule:
@@ -60,3 +62,101 @@ class TestDiscoverAllFunctionsOfModule:
             "xfail",
             "yield_fixture",
         ], "Discovery of external library functions was not complete."
+
+
+class TestWrapBuiltInFuncAsUserDefinedFunc:
+    def test_zero_param_function(self):
+        func = wrap_built_in_func_as_user_defined_func(input)
+        assert func.__name__ == "input", "Name not copied exactly"
+        assert (
+            func.__doc__
+            == """Read a string from standard input.  The trailing newline is stripped.
+
+The prompt string, if given, is printed to standard output without a
+trailing newline before reading input.
+
+If the user hits EOF (*nix: Ctrl-D, Windows: Ctrl-Z+Return), raise EOFError.
+On *nix systems, readline is used if available."""
+        ), "Docstring not copied exactly"
+
+        assert list(inspect.signature(input).parameters) == list(
+            inspect.signature(func).parameters
+        ), "Parameter names not copied exactly"
+
+    def test_one_param_function(self):
+        func = wrap_built_in_func_as_user_defined_func(len)
+        assert func.__name__ == "len", "Name not copied exactly"
+        assert (
+            func.__doc__ == """Return the number of items in a container."""
+        ), "Docstring not copied exactly"
+
+        assert list(inspect.signature(len).parameters) == list(
+            inspect.signature(func).parameters
+        ), "Parameter names not copied exactly"
+
+    def test_more_than_one_param_function(self):
+        func = wrap_built_in_func_as_user_defined_func(pow)
+        assert func.__name__ == "pow", "Name not copied exactly"
+        assert (
+            func.__doc__
+            == """Equivalent to base**exp with 2 arguments or base**exp % mod with 3 arguments
+
+Some types, such as ints, are able to use a more efficient algorithm when
+invoked using the three argument form."""
+        ), "Docstring not copied exactly"
+
+        assert list(inspect.signature(pow).parameters) == list(
+            inspect.signature(func).parameters
+        ), "Parameter names not copied exactly"
+
+
+class TestAddFunctionAsMcpTool:
+    @pytest.mark.asyncio
+    async def test_add_user_defined_function(self):
+        def f(n):
+            return n
+
+        mcp = FastMCP()
+        add_function_as_mcp_tool(func=f, mcp_server=mcp)
+        tools = await mcp._mcp_list_tools()
+        assert len(tools) == 1, "Adding user defined function as MCP tool failed"
+
+    @pytest.mark.asyncio
+    async def test_dont_add_lambda_function(self):
+        f = lambda x: x
+
+        mcp = FastMCP()
+        add_function_as_mcp_tool(func=f, mcp_server=mcp)
+        tools = await mcp._mcp_list_tools()
+        assert len(tools) == 0, "Lambda function was not omitted"
+
+    @pytest.mark.asyncio
+    async def test_add_async_function(self):
+        async def f(n):
+            return n
+
+        mcp = FastMCP()
+        add_function_as_mcp_tool(func=f, mcp_server=mcp)
+        tools = await mcp._mcp_list_tools()
+        assert len(tools) == 1, "Adding async user defined function as MCP tool failed"
+
+    @pytest.mark.asyncio
+    async def test_add_built_in_function(self):
+        f = len
+
+        mcp = FastMCP()
+        add_function_as_mcp_tool(func=f, mcp_server=mcp)
+        tools = await mcp._mcp_list_tools()
+        assert len(tools) == 1, "Adding built-in function as MCP tool failed"
+
+    @pytest.mark.asyncio
+    async def test_failed_import_is_not_fatal_with_warning(self):
+        class UnsupportedType:
+            pass
+
+        def f(x: UnsupportedType):
+            pass
+
+        mcp = FastMCP()
+        with pytest.warns(UserWarning):
+            add_function_as_mcp_tool(func=f, mcp_server=mcp)
