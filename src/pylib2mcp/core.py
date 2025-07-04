@@ -75,7 +75,14 @@ def add_function_as_mcp_tool(func: Callable, mcp_server: FastMCP) -> None:
         return
 
     if isinstance(func, BuiltinFunctionType):
+        try:
             func = wrap_built_in_func_as_user_defined_func(bfunc=func)
+        except ValueError:
+            warnings.warn(
+                f'Failed to add function "{func.__name__}", function signature unknown, and cannot be inferred.',
+                UserWarning,
+            )
+            return
 
     try:
         t = FunctionTool.from_function(fn=func)
@@ -85,10 +92,12 @@ def add_function_as_mcp_tool(func: Callable, mcp_server: FastMCP) -> None:
             f'Failed to add function "{func.__name__}", function paramter type not supported.',
             UserWarning,
         )
+        return
     except Exception as e:
         warnings.warn(
             f'Failed to add function "{func.__name__}" as MCP tool: {e}', UserWarning
         )
+        return
 
 
 def run(
