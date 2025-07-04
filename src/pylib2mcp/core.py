@@ -100,15 +100,12 @@ def add_function_as_mcp_tool(func: Callable, mcp_server: FastMCP) -> None:
         return
 
 
-def run(
+def create_pylib_mcp(
     libraries_and_funcs: Dict[str, Union[str, List[str], None]],
-    transport: Literal["stdio", "streamable-http", "sse"],
-    host: Union[str, None] = "127.0.0.1",
-    port: Union[int, None] = 8000,
     server_name: str = "Function Server",
-) -> None:
+) -> FastMCP:
     """
-    Starts the FastMCP server with the specified library functions as MCP tools.
+    Creates a FastMCP object with the specified library functions as MCP tools.
     Note that the libraries must already be installed.
 
     :param libraries_and_funcs: A dictionary in the format of:
@@ -123,17 +120,9 @@ def run(
         {
             'import name of library': None
         }
-    :param transport: The transport protocol to be used for the server. Can be "stdio", "streamable-http", or "sse".
-    :param host: In case transport is not "stdio", specify the host.
-    :param port: In case transport is not "stdio", specify the port.
     :param server_name: The name of the server. Defaults to "Function Server".
-    :return: None
+    :return: A FastMCP server instance, with the python library functions attached.
     """
-
-    if transport not in ["stdio", "sse", "streamable-http"]:
-        raise ValueError(
-            f'Transport protocol must be one of "stdio", "sse", "streamable-http". "{transport}" is not a valid choice.'
-        )
 
     mcp = FastMCP(server_name)
 
@@ -154,7 +143,4 @@ def run(
             f = import_function_from_module(lib_name, func_name_)
             add_function_as_mcp_tool(func=f, mcp_server=mcp)
 
-    if transport in ["sse", "streamable-http"]:
-        mcp.run(host=host, port=port, transport=transport)
-    elif transport == "stdio":
-        mcp.run(transport=transport)
+    return mcp

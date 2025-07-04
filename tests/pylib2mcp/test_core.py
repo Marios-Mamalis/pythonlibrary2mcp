@@ -4,6 +4,8 @@ import inspect
 import multiprocessing
 from core import *
 
+from src.pylib2mcp.core import create_pylib_mcp
+
 
 class TestImportFunctionFromModule:
 
@@ -163,79 +165,37 @@ class TestAddFunctionAsMcpTool:
             add_function_as_mcp_tool(func=f, mcp_server=mcp)
 
 
-@pytest.fixture
-def pylib2mcp_server_factory():
-    procs = []
+class TestCreatePylibMcp:
 
-    def pylib2mcp_server(**kwargs):
-        proc = multiprocessing.Process(target=run, kwargs=kwargs)
-        proc.start()
-        procs.append(proc)
-
-    yield pylib2mcp_server
-
-    for proc in procs:
-        proc.terminate()
-        proc.join()
-
-
-class TestRun:
-    def test_raise_if_wrong_transport(self):
-        with pytest.raises(ValueError):
-            run(libraries_and_funcs={"math": "sqrt"}, transport="1")
-
-    def test_raise_if_wrong_library_function_dictionary_format(self):
+    @pytest.mark.asyncio
+    async def test_raise_if_wrong_library_function_dictionary_format(self):
         with pytest.raises(TypeError):
-            run(libraries_and_funcs={"math": 1}, transport="sse")
+            create_pylib_mcp(libraries_and_funcs={"math": 1})
 
     @pytest.mark.asyncio
-    async def test_add_single_func(self, pylib2mcp_server_factory):
-        pylib2mcp_server_factory(
-            libraries_and_funcs={"math": "sqrt"},
-            host="localhost",
-            port=8000,
-            transport="sse",
-        )
-        async with Client("http://localhost:8000/sse") as cl:
-            tools = await cl.list_tools()
-            tool_names = [i.name for i in tools]
-            assert tool_names == ["sqrt"]
+    async def test_add_single_func(self):
+        mcp = create_pylib_mcp(libraries_and_funcs={"math": "sqrt"})
+        tools = await mcp._mcp_list_tools()
+        tool_names = [i.name for i in tools]
+        assert tool_names == ["sqrt"]
 
     @pytest.mark.asyncio
-    async def test_add_list_of_funcs(self, pylib2mcp_server_factory):
-        pylib2mcp_server_factory(
-            libraries_and_funcs={"math": ["sqrt", "exp"]},
-            host="localhost",
-            port=8000,
-            transport="sse",
-        )
-        async with Client("http://localhost:8000/sse") as cl:
-            tools = await cl.list_tools()
-            tool_names = [i.name for i in tools]
-            assert tool_names == ["sqrt", "exp"]
+    async def test_add_list_of_funcs(self):
+        mcp = create_pylib_mcp(libraries_and_funcs={"math": ["sqrt", "exp"]})
+        tools = await mcp._mcp_list_tools()
+        tool_names = [i.name for i in tools]
+        assert tool_names == ["sqrt", "exp"]
 
     @pytest.mark.asyncio
-    async def test_add_all_library_funcs(self, pylib2mcp_server_factory):
-        pylib2mcp_server_factory(
-            libraries_and_funcs={"token": None},
-            host="localhost",
-            port=8000,
-            transport="sse",
-        )
-        async with Client("http://localhost:8000/sse") as cl:
-            tools = await cl.list_tools()
-            tool_names = [i.name for i in tools]
-            assert tool_names == ["ISEOF", "ISNONTERMINAL", "ISTERMINAL"]
+    async def test_add_all_library_funcs(self):
+        mcp = create_pylib_mcp(libraries_and_funcs={"token": None})
+        tools = await mcp._mcp_list_tools()
+        tool_names = [i.name for i in tools]
+        assert tool_names == ["ISEOF", "ISNONTERMINAL", "ISTERMINAL"]
 
     @pytest.mark.asyncio
-    async def test_add_from_two_modules(self, pylib2mcp_server_factory):
-        pylib2mcp_server_factory(
-            libraries_and_funcs={"math": "sqrt", "token": "ISEOF"},
-            host="localhost",
-            port=8000,
-            transport="sse",
-        )
-        async with Client("http://localhost:8000/sse") as cl:
-            tools = await cl.list_tools()
-            tool_names = [i.name for i in tools]
-            assert tool_names == ["sqrt", "ISEOF"]
+    async def test_add_from_two_modules(self):
+        mcp = create_pylib_mcp(libraries_and_funcs={"math": "sqrt", "token": "ISEOF"})
+        tools = await mcp._mcp_list_tools()
+        tool_names = [i.name for i in tools]
+        assert tool_names == ["sqrt", "ISEOF"]
