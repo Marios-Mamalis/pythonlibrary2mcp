@@ -1,10 +1,8 @@
 import pytest
 from fastmcp import FastMCP, Client
 import inspect
-import multiprocessing
+import asyncio
 from core import *
-
-from src.pylib2mcp.core import create_pylib_mcp
 
 
 class TestImportFunctionFromModule:
@@ -12,20 +10,12 @@ class TestImportFunctionFromModule:
     def test_import_function_of_built_in_library(self):
         import math
 
-        assert (
-            import_function_from_module(module_name="math", func_name="sqrt")
-            == math.sqrt
-        ), "Import of built-in library function failed."
+        assert import_function_from_module(module_name="math", func_name="sqrt") == math.sqrt, "Import of built-in library function failed."
 
     def test_import_external_library(self):
         from _pytest.config import filename_arg
 
-        assert (
-            import_function_from_module(
-                module_name="_pytest.config", func_name="filename_arg"
-            )
-            == filename_arg
-        ), "Import of built-in library function failed."
+        assert import_function_from_module(module_name="_pytest.config", func_name="filename_arg") == filename_arg, "Import of built-in library function failed."
 
     def test_raise_function_name_not_found_in_library(self):
         with pytest.raises(AttributeError):
@@ -82,20 +72,14 @@ If the user hits EOF (*nix: Ctrl-D, Windows: Ctrl-Z+Return), raise EOFError.
 On *nix systems, readline is used if available."""
         ), "Docstring not copied exactly"
 
-        assert list(inspect.signature(input).parameters) == list(
-            inspect.signature(func).parameters
-        ), "Parameter names not copied exactly"
+        assert list(inspect.signature(input).parameters) == list(inspect.signature(func).parameters), "Parameter names not copied exactly"
 
     def test_one_param_function(self):
         func = wrap_built_in_func_as_user_defined_func(len)
         assert func.__name__ == "len", "Name not copied exactly"
-        assert (
-            func.__doc__ == """Return the number of items in a container."""
-        ), "Docstring not copied exactly"
+        assert func.__doc__ == """Return the number of items in a container.""", "Docstring not copied exactly"
 
-        assert list(inspect.signature(len).parameters) == list(
-            inspect.signature(func).parameters
-        ), "Parameter names not copied exactly"
+        assert list(inspect.signature(len).parameters) == list(inspect.signature(func).parameters), "Parameter names not copied exactly"
 
     def test_more_than_one_param_function(self):
         func = wrap_built_in_func_as_user_defined_func(pow)
@@ -108,9 +92,7 @@ Some types, such as ints, are able to use a more efficient algorithm when
 invoked using the three argument form."""
         ), "Docstring not copied exactly"
 
-        assert list(inspect.signature(pow).parameters) == list(
-            inspect.signature(func).parameters
-        ), "Parameter names not copied exactly"
+        assert list(inspect.signature(pow).parameters) == list(inspect.signature(func).parameters), "Parameter names not copied exactly"
 
 
 class TestAddFunctionAsMcpTool:
@@ -167,35 +149,34 @@ class TestAddFunctionAsMcpTool:
 
 class TestCreatePylibMcp:
 
-    @pytest.mark.asyncio
-    async def test_raise_if_wrong_library_function_dictionary_format(self):
+    def test_raise_if_wrong_library_function_dictionary_format(self):
         with pytest.raises(TypeError):
             create_pylib_mcp(libraries_and_funcs={"math": 1})
 
-    @pytest.mark.asyncio
-    async def test_add_single_func(self):
+    def test_add_single_func(self):
         mcp = create_pylib_mcp(libraries_and_funcs={"math": "sqrt"})
-        tools = await mcp._mcp_list_tools()
+        tools = asyncio.run(mcp._mcp_list_tools())
         tool_names = [i.name for i in tools]
         assert tool_names == ["sqrt"]
 
-    @pytest.mark.asyncio
-    async def test_add_list_of_funcs(self):
+    def test_add_list_of_funcs(self):
         mcp = create_pylib_mcp(libraries_and_funcs={"math": ["sqrt", "exp"]})
-        tools = await mcp._mcp_list_tools()
+        tools = asyncio.run(mcp._mcp_list_tools())
         tool_names = [i.name for i in tools]
         assert tool_names == ["sqrt", "exp"]
 
-    @pytest.mark.asyncio
-    async def test_add_all_library_funcs(self):
+    def test_add_all_library_funcs(self):
         mcp = create_pylib_mcp(libraries_and_funcs={"token": None})
-        tools = await mcp._mcp_list_tools()
+        tools = asyncio.run(mcp._mcp_list_tools())
         tool_names = [i.name for i in tools]
         assert tool_names == ["ISEOF", "ISNONTERMINAL", "ISTERMINAL"]
 
-    @pytest.mark.asyncio
-    async def test_add_from_two_modules(self):
+    def test_add_from_two_modules(self):
         mcp = create_pylib_mcp(libraries_and_funcs={"math": "sqrt", "token": "ISEOF"})
-        tools = await mcp._mcp_list_tools()
+        tools = asyncio.run(mcp._mcp_list_tools())
         tool_names = [i.name for i in tools]
         assert tool_names == ["sqrt", "ISEOF"]
+
+    def test_raise_empty_server(self):
+        with pytest.raises(ValueError):
+            create_pylib_mcp(libraries_and_funcs={})

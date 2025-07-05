@@ -1,5 +1,6 @@
 import importlib
 import inspect
+import asyncio
 from pydantic.errors import PydanticSchemaGenerationError
 from types import BuiltinFunctionType
 from typing import Callable, List, Dict, Union
@@ -127,7 +128,6 @@ def create_pylib_mcp(
     for lib_name, func_name in libraries_and_funcs.items():
         if func_name is None:
             funcs_names = discover_all_functions_of_module(lib_name)
-            print(funcs_names)
         elif isinstance(func_name, list):
             funcs_names = func_name
         elif isinstance(func_name, str):
@@ -138,5 +138,8 @@ def create_pylib_mcp(
         for func_name_ in funcs_names:
             f = import_function_from_module(lib_name, func_name_)
             add_function_as_mcp_tool(func=f, mcp_server=mcp)
+
+    if not asyncio.run(mcp._mcp_list_tools()):
+        raise ValueError("None of the specified library functions was attached to the MCP server.")
 
     return mcp
