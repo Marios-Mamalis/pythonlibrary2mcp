@@ -2,7 +2,7 @@ import importlib
 import inspect
 from pydantic.errors import PydanticSchemaGenerationError
 from types import BuiltinFunctionType
-from typing import Callable, List, Dict, Literal, Union
+from typing import Callable, List, Dict, Union
 import warnings
 
 from fastmcp import FastMCP
@@ -94,15 +94,13 @@ def add_function_as_mcp_tool(func: Callable, mcp_server: FastMCP) -> None:
         )
         return
     except Exception as e:
-        warnings.warn(
-            f'Failed to add function "{func.__name__}" as MCP tool: {e}', UserWarning
-        )
+        warnings.warn(f'Failed to add function "{func.__name__}" as MCP tool: {e}', UserWarning)
         return
 
 
 def create_pylib_mcp(
     libraries_and_funcs: Dict[str, Union[str, List[str], None]],
-    server_name: str = "Function Server",
+    server_name: str = "Python function server",
 ) -> FastMCP:
     """
     Creates a FastMCP object with the specified library functions as MCP tools.
@@ -120,7 +118,7 @@ def create_pylib_mcp(
         {
             'import name of library': None
         }
-    :param server_name: The name of the server. Defaults to "Function Server".
+    :param server_name: The name of the server. Defaults to "Python function server".
     :return: A FastMCP server instance, with the python library functions attached.
     """
 
@@ -135,9 +133,7 @@ def create_pylib_mcp(
         elif isinstance(func_name, str):
             funcs_names = [func_name]
         else:
-            raise TypeError(
-                f"Function names must be list, str or None, not {type(func_name).__name__}"
-            )
+            raise TypeError(f"Function names must be list, str or None, not {type(func_name).__name__}")
 
         for func_name_ in funcs_names:
             f = import_function_from_module(lib_name, func_name_)
