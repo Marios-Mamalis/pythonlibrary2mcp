@@ -1,5 +1,5 @@
 import pytest
-from cli import parse_library_functions
+from pylib2mcp.cli import *
 
 
 class TestParseLibraryFunctions:

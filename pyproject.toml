@@ -1,7 +1,12 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "pylib2mcp"
 version = "1.0.0"
 description = "Port Python library functions as MCP tools"
+readme = "README.md"
 requires-python = "==3.12.*"
 dependencies = [
     "fastmcp==2.8.1",
@@ -15,9 +20,6 @@ dev = [
     "pytest>=8.4.1",
     "pytest-asyncio>=1.0.0",
 ]
-
-[tool.pytest.ini_options]
-pythonpath = ["src/pylib2mcp"]
 
 [tool.black]
 line-length = 500

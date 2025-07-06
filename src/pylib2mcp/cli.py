@@ -1,6 +1,6 @@
 import typer
-from typing import Annotated, Dict, List, Literal
-from core import create_pylib_mcp
+from typing import Annotated, Dict, List
+from pylib2mcp import create_pylib_mcp
 
 
 def parse_library_functions(values: List[str]) -> Dict[str, List[str]]:

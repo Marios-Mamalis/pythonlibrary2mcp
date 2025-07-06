@@ -1,8 +1,8 @@
 import pytest
-from fastmcp import FastMCP, Client
+from fastmcp import FastMCP
 import inspect
 import asyncio
-from core import *
+from pylib2mcp.core import *
 
 
 class TestImportFunctionFromModule:
