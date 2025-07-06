@@ -1,6 +1,6 @@
 import typer
 from typing import Annotated, Dict, List
-from pylib2mcp import create_pylib_mcp
+import pylib2mcp
 
 
 def parse_library_functions(values: List[str]) -> Dict[str, List[str]]:
@@ -34,7 +34,7 @@ def run(
 
     libraries_and_funcs = parse_library_functions(library_functions)
 
-    mcp_server = create_pylib_mcp(libraries_and_funcs=libraries_and_funcs, server_name=server_name)
+    mcp_server = pylib2mcp.create_pylib_mcp(libraries_and_funcs=libraries_and_funcs, server_name=server_name)
 
     if transport == "stdio":
         mcp_server.run(transport=transport)
@@ -45,7 +45,7 @@ def run(
 @app.command()
 def version():
     """Show pylib2mcp version"""
-    raise NotImplementedError
+    typer.echo(f"Pylib2mcp Version: {pylib2mcp.__version__}")
 
 
 if __name__ == "__main__":
