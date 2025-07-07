@@ -3,7 +3,7 @@ name = "pylib2mcp"
 dynamic = ["version"]
 description = "Port Python library functions as MCP tools"
 readme = "README.md"
-requires-python = "==3.12.*"
+requires-python = ">=3.10,<3.14"
 dependencies = [
     "fastmcp==2.8.1",
     "pydantic>=2.11.7",
@@ -17,6 +17,8 @@ dev = [
     "black>=25.1.0",
     "pytest>=8.4.1",
     "pytest-asyncio>=1.0.0",
+    "tox>=4.27.0",
+    "tox-uv>=1.26.1",
 ]
 
 [tool.black]
