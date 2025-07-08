@@ -1,9 +1,9 @@
 import typer
-from typing import Annotated, Dict, List
+from typing import Annotated, Dict, List, Union
 import pylib2mcp
 
 
-def parse_library_functions(values: List[str]) -> Dict[str, List[str]]:
+def parse_library_functions(values: List[str]) -> Dict[str, Union[List[str], None]]:
     result = {}
     for item in values:
         if ":" in item:
