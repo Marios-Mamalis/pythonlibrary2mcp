@@ -1,3 +1,6 @@
+# Code adapted from https://github.com/jlowin/fastmcp
+# Licensed under the Apache License, Version 2.0
+
 import typer
 from typing import Annotated, Dict, List, Union
 import pylib2mcp
