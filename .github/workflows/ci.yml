@@ -10,7 +10,6 @@ jobs:
   build-test:
     name: Build and test
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -24,7 +23,12 @@ jobs:
           source .venv/bin/activate
           uv sync
 
-      - name: Test
+      - name: Test python versions
         run: |
           source .venv/bin/activate
           tox
+
+      - name: Check formatting
+        run: |
+          source .venv/bin/activate
+          black . --check
