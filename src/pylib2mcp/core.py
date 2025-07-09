@@ -53,7 +53,7 @@ def wrap_built_in_func_as_user_defined_func(bfunc: Callable) -> Callable:
     params = ", ".join(list(inspect.signature(bfunc).parameters))
     code = f"""
 def wfunc({params}):
-    return ({params})
+    return {bfunc.__name__}({params})
 """
 
     namespace = {}
