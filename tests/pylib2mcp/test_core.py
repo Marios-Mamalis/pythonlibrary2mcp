@@ -99,12 +99,15 @@ class TestAddFunctionAsMcpTool:
     @pytest.mark.asyncio
     async def test_add_user_defined_function(self):
         def f(n):
-            return n
+            return n + 1
 
         mcp = FastMCP()
         add_function_as_mcp_tool(func=f, mcp_server=mcp)
         tools = await mcp._mcp_list_tools()
         assert len(tools) == 1, "Adding user defined function as MCP tool failed"
+
+        sample_tool_call = await mcp._call_tool("f", {"n": 5})
+        assert int(sample_tool_call[0].text) == 6, "Function not working correctly."
 
     @pytest.mark.asyncio
     async def test_dont_add_lambda_function(self):
@@ -118,12 +121,15 @@ class TestAddFunctionAsMcpTool:
     @pytest.mark.asyncio
     async def test_add_async_function(self):
         async def f(n):
-            return n
+            return n + 1
 
         mcp = FastMCP()
         add_function_as_mcp_tool(func=f, mcp_server=mcp)
         tools = await mcp._mcp_list_tools()
         assert len(tools) == 1, "Adding async user defined function as MCP tool failed"
+
+        sample_tool_call = await mcp._call_tool("f", {"n": 5})
+        assert int(sample_tool_call[0].text) == 6, "Function not working correctly."
 
     @pytest.mark.asyncio
     async def test_add_built_in_function(self):
@@ -133,6 +139,9 @@ class TestAddFunctionAsMcpTool:
         add_function_as_mcp_tool(func=f, mcp_server=mcp)
         tools = await mcp._mcp_list_tools()
         assert len(tools) == 1, "Adding built-in function as MCP tool failed"
+
+        sample_tool_call = await mcp._call_tool("len", {"obj": "test"})
+        assert int(sample_tool_call[0].text) == 4, "Function not working correctly."
 
     @pytest.mark.asyncio
     async def test_failed_import_is_not_fatal_with_warning(self):
