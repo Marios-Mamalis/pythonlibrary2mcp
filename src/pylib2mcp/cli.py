@@ -27,7 +27,7 @@ app = typer.Typer(
 
 @app.command()
 def run(
-    library_functions: Annotated[List[str], typer.Option(..., "--library-functions", help="Functions from python libraries to attach as tools. Format: lib1:func1,func2 lib2:func3 lib3")],
+    library_functions: Annotated[List[str], typer.Option(..., "--library-functions", help="Functions from python libraries to attach as tools. Format: lib1:func1,func2 or lib1:func1 or lib1")],
     server_name: Annotated[str | None, typer.Option("--name", "-n", help="The name of the server (default: 'Python function server')")] = None,
     transport: Annotated[str, typer.Option("--transport", "-t", help="Transport protocol to use (stdio, streamable-http, or sse) (default: stdio)")] = "stdio",
     host: Annotated[str | None, typer.Option("--host", help="Host to bind to when using http transport (default: 127.0.0.1)")] = None,
