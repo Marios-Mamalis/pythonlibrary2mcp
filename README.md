@@ -1,4 +1,14 @@
-# PythonLibrary2MCP
+<div align="center">
+    <h1>
+        PythonLibrary2MCP
+    </h1>
+
+![Versions](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue)
+![Tests](https://github.com/Marios-Mamalis/pythonlibrary2mcp/actions/workflows/ci.yml/badge.svg)
+![Black](https://img.shields.io/badge/code%20style-black-000000.svg)
+</div>
+
+<br>
 
 The purpose of this utility is to provide a simple way to quickly port functions of existing Python 
 libraries (both built-in and external) as MCP (Model Context Protocol) server tools.
