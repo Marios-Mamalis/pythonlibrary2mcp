@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/marios-mamalis-pythonlibrary2mcp-badge.png)](https://mseep.ai/app/marios-mamalis-pythonlibrary2mcp)
+
 <div align="center">
     <h1>
         PythonLibrary2MCP
