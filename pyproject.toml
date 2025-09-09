@@ -32,13 +32,16 @@ dev = [
     "black>=25.1.0",
     "pytest>=8.4.1",
     "pytest-asyncio>=1.0.0",
+    "ruff>=0.12.12",
     "tox>=4.27.0",
     "tox-uv>=1.26.1",
 ]
 
-[tool.black]
-line-length = 500
-
+[tool.ruff.lint]
+ignore = [
+    "E731",  # Assigning lambda functions to variables.
+    "E501",  # Line too long.
+]
 
 # ---------------- Build ----------------
 

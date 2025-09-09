@@ -31,4 +31,4 @@ jobs:
       - name: Check formatting
         run: |
           source .venv/bin/activate
-          black . --check
+          ruff check
